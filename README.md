@@ -1,5 +1,5 @@
 #huey - An API for Louisiana Statutory Law
-## Overview 
+### Overview 
 This project, huey, hopes to make Louisiana statutory law more readily accessible  to
 developers.  It is inspired by [Eric Mill's work](http://radar.oreilly.com/2012/12/the-united-states-code-is-on-github.html)
 on the [U.S. Code] (https://github.com/unitedstates).  Although the State of Louisiana
@@ -24,7 +24,7 @@ Still in the planning stages.
 ### The name?
 The project is dedicated to this guy:
 
-![Huey P. Long](http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/HueyPLongGesture.jpg/220px-HueyPLongGesture.jpg "We gonna 
+![Image of Huey P. Long](http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/HueyPLongGesture.jpg/220px-HueyPLongGesture.jpg "We gonna 
 stick it to Standard Oil!")
 
 ### License (MIT)
