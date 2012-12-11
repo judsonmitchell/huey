@@ -19,7 +19,9 @@ Still in the planning stages.
 
 ### The name?
 The project is dedicated to this guy:
-![Huey P. Long](http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/HueyPLongGesture.jpg/220px-HueyPLongGesture.jpg)
+
+![Huey P. Long](http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/HueyPLongGesture.jpg/220px-HueyPLongGesture.jpg "We gonna 
+stick it to Standard Oil!")
 
 ### License (MIT)
 Copyright (c) 2012 Judson Mitchell, Three Pipe Problem, LLC
