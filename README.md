@@ -7,11 +7,15 @@ makes its laws [available on the internet](http://legis.la.gov/lss/toc.htm), it'
 now impossible for developers to access these laws in a programmatic way.
 
 For starters, I am developing a scraper, written in php, to retrieve and order all 
-the Louisiana laws in a database.  After that, I'll move on to developing a RESTful API.
+the Louisiana laws in a database.  After that, I'll move on to developing a RESTful API. Anyone
+who would like to help (particularly in porting this to other languages), is more than
+welcome.
 
 ### Scraper
-The scraper is still very much experimental.
+The scraper is still very much experimental. 
+
 Usage:
+
     php index.php
 
 ### RESTful API
