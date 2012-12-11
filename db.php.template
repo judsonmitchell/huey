@@ -1,0 +1,22 @@
+<?php
+
+$dbhost = '';
+$database_name = '';
+$dbusername = '';
+$dbpasswd = '';
+
+try {
+        $dbh = new PDO("mysql:host=" . $dbhost . ";dbname=" . $database_name , $dbusername, $dbpasswd);
+        
+        // MS SQL Server and Sybase with PDO_DBLIB
+        //$dbh = new PDO("mssql:host=" . $dbhost . ";dbname=" . $database_name, $dbusername, $dbpasswd");
+        //$dbh = new PDO("sybase:host=" . $dbhost" . ";dbname=" . $database_name, $dbusername, $dbpasswd");
+            
+        // SQLite Database  
+        //$dbh = new PDO("sqlite:INSERT_PATH_TO_SQLITE");       
+        
+    }
+catch(PDOException $e)
+    {
+        echo $e->getMessage();
+    }
