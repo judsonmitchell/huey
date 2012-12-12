@@ -27,6 +27,10 @@ The project is dedicated to this guy:
 ![Image of Huey P. Long](http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/HueyPLongGesture.jpg/220px-HueyPLongGesture.jpg "We gonna 
 stick it to Standard Oil!")
 
+>One of these days the people of Louisiana 
+>are going to get good government -
+>and they aren't going to like it.
+
 ### License (MIT)
 Copyright (c) 2012 Judson Mitchell, Three Pipe Problem, LLC
 
