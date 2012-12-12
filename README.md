@@ -16,7 +16,7 @@ The scraper is still very much experimental.
 
 Usage:
 
-    php index.php
+    php scraper/scraper.php
 
 ### RESTful API
 Still in the planning stages.

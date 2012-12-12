@@ -68,7 +68,7 @@ $docs = 0; //number of urls touched
 //appear to have any logic to assigning these ids, but as far as I can
 //tell the lowest id is around 66000 and the highest around 750000 
 $min = 98976;
-$max = 100000;
+$max = 98986;
 
 
 for ($min; $min <= $max; $min++) {
