@@ -1,8 +1,20 @@
 <?php
-//First attempt at scraper
-//http://simplehtmldom.sourceforge.net/manual.htm#section_quickstart
+/*
+    -----------------------------------------
+    huey - Statute Scraper for Louisiana Laws
+    -----------------------------------------
+    + https://github.com/judsonmitchell/huey
+    + Copyright 2012 Judson Mitchell, Three Pipe Problem, LLC
+    + MIT License
+    
+    Uses PHP Simple HTML DOM Parser:
+    http://simplehtmldom.sourceforge.net/manual.htm#section_quickstart
+*/
+
 require_once('db.php');
 require_once('simple_html_dom.php');
+
+$time_start = microtime(true);
 
 //Function to deal with anomalies in sortcode; remove any data
 //which is unncessary or which destroys the sort
@@ -37,6 +49,10 @@ function clean_sortcodes($val)
             $sortcode = substr($val,13);    
             return $sortcode;
             break;
+        case  substr_count($val,'LAC') > 1: //admin code;duplicate "LAC"
+            $sortcode = substr($val,11);    
+            return $sortcode;
+            break;
         default:
             return $val;
             break;
@@ -51,8 +67,8 @@ $docs = 0; //number of urls touched
 //Define the ranges of document ids we are requesting; State does not
 //appear to have any logic to assigning these ids, but as far as I can
 //tell the lowest id is around 66000 and the highest around 750000 
-$min = 206274;
-$max = 206474;
+$min = 750000;
+$max = 750100;
 
 
 for ($min; $min <= $max; $min++) {
@@ -67,7 +83,6 @@ for ($min; $min <= $max; $min++) {
     {
         $law->clear(); 
         unset($law);
-        return false;
     }
     else
     {
@@ -110,7 +125,10 @@ for ($min; $min <= $max; $min++) {
         //are, however, aligned center, so just find the first paragraph that is
         //aligned justify
         $first_para = $law->find('p[align="justify"]',0);
-        $alt_description = explode('&nbsp;',$first_para->innertext);
+        if ($first_para)
+        {
+            $alt_description = explode('&nbsp;',$first_para->innertext);
+        }
 
         if (isset($meta['description']))
         {
@@ -168,5 +186,10 @@ for ($min; $min <= $max; $min++) {
     }
 }
 
-echo "\nScraping complete. $docs urls scanned, $counter statutes added, $errors errors";
+//Find execution time
+$time_end = microtime(true);
+$execution_time = ($time_end - $time_start)/60;
+
+echo "\nScraping complete in " . round($execution_time,2) . " minutes.
+$docs urls scanned, $counter statutes added, $errors errors";
 
