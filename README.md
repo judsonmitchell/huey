@@ -30,6 +30,7 @@ stick it to Standard Oil!")
 >One of these days the people of Louisiana 
 >are going to get good government -
 >and they aren't going to like it.
+-- Huey P. Long
 
 ### License (MIT)
 Copyright (c) 2012 Judson Mitchell, Three Pipe Problem, LLC

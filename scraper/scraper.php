@@ -53,6 +53,10 @@ function clean_sortcodes($val)
             $sortcode = substr($val,11);    
             return $sortcode;
             break;
+        case  substr_count($val,'CA') > 1: //constit. amends; duplicate "CA" *
+            $sortcode = substr($val,3);    
+            return $sortcode;
+            break;
         default:
             return $val;
             break;
