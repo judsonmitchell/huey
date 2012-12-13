@@ -78,7 +78,6 @@ $docs = 0; //number of urls touched
 $min = 180587;
 $max = 750000;
 
-
 for ($min; $min <= $max; $min++) {
 
     $law = file_get_html('http://legis.la.gov/lss/newWin.asp?doc=' . $min);
@@ -113,7 +112,6 @@ for ($min; $min <= $max; $min++) {
                 $body_html = $b->innertext;
             }
 
-        
             //generate an alternative description if meta does not have it
             //Having to find the align attribute is a special bit of fun; 99%
             //of the time, the first paragraph has the description; but sometimes,
