@@ -57,6 +57,10 @@ function clean_sortcodes($val)
             $sortcode = substr($val,3);    
             return $sortcode;
             break;
+        case  substr_count($val,'ERC') > 1: //ERC?; duplicate "ERC" 
+            $sortcode = substr($val,4);    
+            return $sortcode;
+            break;
         default:
             return $val;
             break;
@@ -79,7 +83,7 @@ for ($min; $min <= $max; $min++) {
 
     $law = file_get_html('http://legis.la.gov/lss/newWin.asp?doc=' . $min);
 
-    if (isObject($law)) {
+    if (is_object($law)) {
 
         $docs++; //url has been hit
 
