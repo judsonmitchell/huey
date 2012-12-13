@@ -1,7 +1,11 @@
 RewriteEngine On
-    RewriteBase /
+#RewriteBase /
+#
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /~judson/huey/api/index.php/$1 [L,QSA]
+#RewriteRule ^([^/]*)/([^/]*)/([^/]*)/([^/]*)$ /~judson/huey/api/index.php?a=$1&b=$2&c=$3&c=$4 [L]
 
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php/$1 [L]
-
+#RewriteCond %{REQUEST_FILENAME} !-f
+#RewriteCond %{REQUEST_FILENAME} !-d
+#RewriteRule ^(.*)$ index.php?q=$1 [L,QSA]
