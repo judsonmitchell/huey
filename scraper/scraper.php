@@ -53,7 +53,7 @@ function clean_sortcodes($val)
             $sortcode = substr($val,11);    
             return $sortcode;
             break;
-        case  substr_count($val,'CA') > 1: //constit. amends; duplicate "CA" *
+        case  substr_count($val,'CA') > 1: //constit. amends; duplicate "CA" 
             $sortcode = substr($val,3);    
             return $sortcode;
             break;
@@ -71,121 +71,110 @@ $docs = 0; //number of urls touched
 //Define the ranges of document ids we are requesting; State does not
 //appear to have any logic to assigning these ids, but as far as I can
 //tell the lowest id is around 66000 and the highest around 750000 
-$min = 66000;
+$min = 180587;
 $max = 750000;
 
 
 for ($min; $min <= $max; $min++) {
 
     $law = file_get_html('http://legis.la.gov/lss/newWin.asp?doc=' . $min);
-    if ($law)
-    {
+
+    if (isObject($law)) {
+
         $docs++; //url has been hit
-    }
 
-    if (!$law->find('html',0)) //Server returns 'file not found'
-    {
-        $law->clear(); 
-        unset($law);
-    }
-    else
-    {
-        //Parse meta tags
-        $meta = array();
-        foreach($law->find('meta') as $item) {
-            $meta[$item->name] = $item->content; 
-        }
-
-        //In the revised statutes, the meta tags contain the law title; in 
-        //the others, there is no such tag.  So parse the <title> tag
-        $title = array();
-        foreach ($law->find('title') as $item) {
-            $title = $item->innertext;
-        }
-
-        //Get the entire body of the law; will use later when applying diff
-        //to see if there has been a change
-        foreach ($law->find('body') as $b) {
-            $body_html = $b->innertext;
-        }
-
-        //Parse law body into paragraphs
-        $body = array();
-        $i = 0;
-        foreach ($law->find('p') as $para) {
-            $body[$i] = $para->innertext;
-            $i++;
-        }
-
-        //Serialize body array; will use this later in API to retrieve
-        //parts of laws by paragraph number
-        $body_string = serialize($body);
-       
-        //generate an alternative description if meta does not have it
-        //Having to find the align attribute is a special bit of fun; 99%
-        //of the time, the first paragraph has the description; but sometimes,
-        //if it's the start of the chapter, you get chapter name instead; these
-        //are, however, aligned center, so just find the first paragraph that is
-        //aligned justify
-        $first_para = $law->find('p[align="justify"]',0);
-        if ($first_para)
+        if (!$law->find('html',0)) //Server returns 'file not found'
         {
-            $alt_description = explode('&nbsp;',$first_para->innertext);
-        }
-
-        if (isset($meta['description']))
-        {
-            $description = $meta['description'];
-        }
-        elseif (isset($alt_description[1]))
-        {
-            $description = $alt_description[1];
+            $law->clear(); 
+            unset($law);
         }
         else
         {
-            $description = ''; //all else fails
-        }
+            //Parse meta tags
+            $meta = array();
+            foreach($law->find('meta') as $item) {
+                $meta[$item->name] = $item->content; 
+            }
 
-        //Deal with inconsistent case of sortcode meta tag;
-        //sometimes it's capitalized, sometimes not
-        if (isset($meta['sortcode']))
-        {
-            $sortcode = clean_sortcodes($meta['sortcode']);    
-        }
-        else
-        {
-            $sortcode = clean_sortcodes($meta['Sortcode']);    
-        }
+            //In the revised statutes, the meta tags contain the law title; in 
+            //the others, there is no such tag.  So parse the <title> tag
+            $title = array();
+            foreach ($law->find('title') as $item) {
+                $title = $item->innertext;
+            }
 
-        //Put data in db
-        $q = $dbh->prepare("INSERT INTO `lalaws`.`laws` (`id`, `docid`, `title`,
-        `description`, `sortcode`, `law_text`, `law_text_elements`, `last_scraped`) 
-        VALUES (NULL, :docid, :title, :description, :sortcode, :law_text, 
-        :law_text_elements, CURRENT_TIMESTAMP);");
- 
-        $data = array(
-            ':docid' => $min,
-            ':title' => $title,
-            ':description' => $description,
-            ':sortcode' => $sortcode,
-            ':law_text' => $body_html,
-            ':law_text_elements' => $body_string
-            );
+            //Get the entire body of the law; will use later when applying diff
+            //to see if there has been a change
+            foreach ($law->find('body') as $b) {
+                $body_html = $b->innertext;
+            }
 
-        $q->execute($data);
+        
+            //generate an alternative description if meta does not have it
+            //Having to find the align attribute is a special bit of fun; 99%
+            //of the time, the first paragraph has the description; but sometimes,
+            //if it's the start of the chapter, you get chapter name instead; these
+            //are, however, aligned center, so just find the first paragraph that is
+            //aligned justify
+            $first_para = $law->find('p[align="justify"]',0);
+            if ($first_para)
+            {
+                $alt_description = explode('&nbsp;',$first_para->innertext);
+            }
 
-        $error = $q->errorInfo();
-        if ($error[1])
-        {
-            print_r($error);$errors++;
+            if (isset($meta['description']))
+            {
+                $description = $meta['description'];
+            }
+            elseif (isset($alt_description[1]))
+            {
+                $description = $alt_description[1];
+            }
+            else
+            {
+                $description = ''; //all else fails
+            }
+
+            //Deal with inconsistent case of sortcode meta tag;
+            //sometimes it's capitalized, sometimes not
+            if (isset($meta['sortcode']))
+            {
+                $sortcode = clean_sortcodes($meta['sortcode']);    
+            }
+            else
+            {
+                $sortcode = clean_sortcodes($meta['Sortcode']);    
+            }
+
+            //Put data in db
+            $q = $dbh->prepare("INSERT INTO `lalaws`.`laws` (`id`, `docid`, `title`,
+            `description`, `sortcode`, `law_text`,`last_scraped`) 
+            VALUES (NULL, :docid, :title, :description, :sortcode, :law_text, 
+            CURRENT_TIMESTAMP);");
+    
+            $data = array(
+                ':docid' => $min,
+                ':title' => $title,
+                ':description' => $description,
+                ':sortcode' => $sortcode,
+                ':law_text' => $body_html
+                );
+
+            $q->execute($data);
+
+            $error = $q->errorInfo();
+            if ($error[1])
+            {
+                print_r($error);$errors++;
+            }
+            else
+            {
+                $counter++;
+            }
+
+            $law->clear(); 
+            unset($law);
         }
-        else
-        {
-            $counter++;
-        }
-
-        $law->clear(); 
-        unset($law);
     }
 }
 
