@@ -10,11 +10,11 @@
 */
 
 require_once('../db.php');
-error_reporting(E_ALL);
+
 function handle_request($dbh,$params)
 {
     //print_r($params);die;
-    $books = array('RS','CE','CCH','LAC');//supported sections
+    $books = array('RS','CE','CCH','LAC','CA');//supported sections
     
     if (in_array(strtoupper($params[0]), $books))
     {
@@ -26,27 +26,49 @@ function handle_request($dbh,$params)
             $book = strtoupper($params[0]);
             //strip the book title (RS,CE, etc), leave only section numbers
             array_shift($params);
-            $sections = null;
+
+            //Sometimes sortcodes are 5 digits, sometimes 6; so we have 
+            //to provide for both circumstances.
+            $sections_5 = null;
+            $sections_6 = null;
+
             foreach ($params as $param) {
 
-                $sections .= " " .  str_pad($param, 6, '0', STR_PAD_LEFT);
+                $sections6 .= " " .  str_pad($param, 6, '0', STR_PAD_LEFT);
                 
             }
-            
-            $sortcode = $book . $sections;
-            $q = $dbh->prepare("select * from laws where sortcode like ?");
-            $q->bindParam(1, $sortcode);
+
+            foreach ($params as $param) {
+
+                $sections5 .= " " .  str_pad($param, 5, '0', STR_PAD_LEFT);
+                
+            }
+
+            $sortcode5 = $book . $sections5;
+            $sortcode6 = $book . $sections6;
+            $q = $dbh->prepare("select * from laws where sortcode like ? or sortcode like ?");
+            $q->bindParam(1, $sortcode5);
+            $q->bindParam(2, $sortcode6);
             $q->execute();
-            $result = $q->fetch(PDO::FETCH_ASSOC);
+            $r = $q->fetch(PDO::FETCH_ASSOC);
             $error = $q->errorInfo();
-            //if ($error[1]) { 
-            //    return array('status' => '500 Internal Server Error','message' => $error[2]);}
-            //if ($result->rowCount() < 1) {
-            //    return array('status' => '404 Not Found','message' => 'No documents matched your request');}
-            //else {
-            //    $result['status'] = '200 OK';
-            //    return $result;
-            //}
+            $result = null;
+            if ($error[2]) 
+            { 
+                $result =  array('status' => '500 Internal Server Error','message' => $error[2]);
+            }
+            else if ($q->rowCount() < 1) 
+            {
+                $result =  array('status' => '404 Not Found','message' => 'No documents matched your request');
+            }
+            else 
+            {
+                //add status code to beginning of array
+                $arr = array_reverse($r, true); 
+                $arr['status'] = '200 OK'; 
+                $result = array_reverse($arr, true); 
+            }
+
             return $result;
         }
     }
@@ -72,7 +94,7 @@ else
 }
 
 $result = handle_request($dbh,$params);
-//header("{$_SERVER['SERVER_PROTOCOL']}" . $result['status']);
+header($_SERVER['SERVER_PROTOCOL'] . " " .  $result['status']);
 echo json_encode($result);
 
 //What does an API request look like?:
