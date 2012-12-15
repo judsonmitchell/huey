@@ -109,7 +109,14 @@ for ($min; $min <= $max; $min++) {
             //Get the entire body of the law; will use later when applying diff
             //to see if there has been a change
             foreach ($law->find('body') as $b) {
-                $body_html = $b->innertext;
+                $body = $b->innertext;
+            }
+
+            //Strip all class and align attributes from p http://stackoverflow.com/a/3026111/49359
+            $body_html = str_get_html($body);
+            foreach ( $body_html->find('p') as $value ){
+                $value->class = null;
+                $value->align = null;
             }
 
             //generate an alternative description if meta does not have it
@@ -184,6 +191,4 @@ for ($min; $min <= $max; $min++) {
 $time_end = microtime(true);
 $execution_time = ($time_end - $time_start)/60;
 
-echo "\nScraping complete in " . round($execution_time,2) . " minutes.
-$docs urls scanned, $counter statutes added, $errors errors";
-
+echo "\nScraping complete in " . round($execution_time,2) . " minutes.  $docs urls scanned, $counter statutes added, $errors errors"; 
