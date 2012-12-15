@@ -9,12 +9,41 @@
     
 */
 
+/*
+What does an API request look like?:
+
+Look for an individual statute:
+    http://.../huey/api/RS/14/35/1 
+    http://.../huey/api/STATUTEGROUP/ID1/ID2/ID3
+
+    ID1 = first grouping in sortorder
+    ID2 = second grouping in sortorder
+    ID3 = third grouping in sortorder
+
+These ids are identified only by numbers
+
+OR 
+Do a search
+    http://..../huey/api/SEARCHTERM
+    http://..../huey/api/cch/SEARCHTERM
+searches entire children's code for search term
+
+    http://.../huey/api/RS/14/SEARCHTERM
+searches all of criminal code for search term
+*/
+
 require_once('../db.php');
 
 function handle_request($dbh,$params)
 {
-    //print_r($params);die;
-    $books = array('RS','CE','CCH','LAC','CA');//supported sections
+    //supported sections
+    $books = array(
+        'RS',   //Revised Statutes
+        'CE',   //Code of Evidence
+        'CCH',  //Children's Code
+        'LAC',  //La. Admin Code
+        'CA'    //Constit.  Amends.
+        );
     
     if (in_array(strtoupper($params[0]), $books))
     {
@@ -96,28 +125,4 @@ else
 $result = handle_request($dbh,$params);
 header($_SERVER['SERVER_PROTOCOL'] . " " .  $result['status']);
 echo json_encode($result);
-
-//What does an API request look like?:
-
-//Look for an individual statute:
-//    http://.../huey/api/RS/14/35/1 
-//    http://.../huey/api/STATUTEGROUP/ID1/ID2/ID3
-//
-//    ID1 = first grouping in sortorder
-//    ID2 = second grouping in sortorder
-//    ID3 = third grouping in sortorder
-//
-//These ids are identified only by numbers
-//
-//OR 
-//Do a search
-//    http://..../huey/api/SEARCHTERM
-//    http://..../huey/api/SEARCHTERM
-//searches entire children's code for search term
-//
-//    http://.../huey/api/RS/14/SEARCHTERM
-//searches all of criminal code for search term
-
-
-
 
