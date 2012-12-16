@@ -57,8 +57,9 @@ else
 
 array_shift($params);
 $query = new handle_request();
-$query->run_query($dbh,$params);
-echo $query->return_data();
+//$query->run_query($dbh,$params);
+$query->get_query_type($params);
+echo $query->generate_sortcodes();
 //header($_SERVER['SERVER_PROTOCOL'] . " " .  $result['status']);
 //echo json_encode($result);
 
