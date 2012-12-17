@@ -1,15 +1,18 @@
 <?php
-/*
-    -----------------------------------------
-    huey - Statute Scraper for Louisiana Laws
-    -----------------------------------------
-    + https://github.com/judsonmitchell/huey
-    + Copyright 2012 Judson Mitchell, Three Pipe Problem, LLC
-    + MIT License
-    
-    Uses PHP Simple HTML DOM Parser:
-    http://simplehtmldom.sourceforge.net/
-*/
+/**
+ * Huey - An API for Louisiana Statutory Laws
+ *
+ * This is the scraper which retrieves the laws
+ * from the Legislature's database.
+ * 
+ * Uses PHP Simple HTML DOM Parser:
+ * http://simplehtmldom.sourceforge.net/
+ *
+ * @author Judson Mitchell <judsonmitchell@gmail.com>
+ * @copyright 2012 Judson Mitchell, Three Pipe Problem, LLC
+ * @url https://github.com/judsonmitchell/huey
+ * @license MIT
+ */
 
 require_once('../db.php');
 require_once('simple_html_dom.php');
@@ -75,7 +78,7 @@ $docs = 0; //number of urls touched
 //Define the ranges of document ids we are requesting; State does not
 //appear to have any logic to assigning these ids, but as far as I can
 //tell the lowest id is around 66000 and the highest around 750000 
-$min = 180587;
+$min = 66000;
 $max = 750000;
 
 for ($min; $min <= $max; $min++) {
@@ -191,4 +194,5 @@ for ($min; $min <= $max; $min++) {
 $time_end = microtime(true);
 $execution_time = ($time_end - $time_start)/60;
 
-echo "\nScraping complete in " . round($execution_time,2) . " minutes.  $docs urls scanned, $counter statutes added, $errors errors"; 
+echo "\nScraping complete in " . round($execution_time,2) .
+" minutes.  $docs urls scanned, $counter statutes added, $errors errors"; 
