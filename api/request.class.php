@@ -17,70 +17,130 @@ class handle_request
         'AGO',  //AG Opinions
         'CONST' //La. Constit
         );
-    
-    public function get_query_type($params)
+
+     public function __construct() {
+     //Get the parameters
+
+         parse_str($_SERVER['QUERY_STRING'],$query_string); //check for query string
+
+         if (count($query_string) > 0)
+         {
+             $params = $query_string;
+         }
+         else
+         {
+             $params = explode('/', $_SERVER['PATH_INFO']);
+         }
+
+         array_shift($params);
+         $this->params = $params;
+         $this->generate_sortcodes();
+    }
+
+   
+    public function generate_sortcodes()
     {
-        if (in_array(strtoupper($params[0]), $this->books) && ctype_digit(end($params)))
-        {
-            $this->type = 'book_specific';
+        if (in_array(strtoupper($this->params[0]), $this->books) && ctype_digit(end($this->params)))
+        {  //book specific, e.g, api/rs/14/49
+            $this->sortcode = array_shift($this->params);
+            foreach ($this->params as $val) {
+                $this->sortcode .= " %" . str_pad($val, 5, '0', STR_PAD_LEFT) ;
+            }
         }
-        else if ( in_array(strtoupper($params[0]), $this->books) && ctype_alnum(end($params)))
+        else if ( in_array(strtoupper($this->params[0]), $this->books) && ctype_alnum(end($this->params)))
+        {   //book search, e.g, api/rs/14/intent
+            $this->sortcode = array_shift($this->params);
+            $search = array_pop($this->params);
+            foreach ($this->params as $val) {
+                $this->sortcode .= " %" .  str_pad($val, 5, '0', STR_PAD_LEFT);
+            }
+            $this->sortcode .= '%';
+            $this->searchterm = "%$search%";
+        } 
+        else if (!end($this->params)) //book list, e.g. api/rs/14/32/
         {
-            $this->type = 'book_search';
+            $this->sortcode = array_shift($this->params);
+            foreach ($this->params as $val) {
+                $this->sortcode .= " %" .  str_pad($val, 5, '0', STR_PAD_LEFT);
+            }
+            $this->sortcode .= "%";
+        
         }
-        else if (!end($params)) //e.g. api/rs/14/32/
+        else if (!in_array(strtoupper($this->params[0]))) //global search e.g, api/burglary
         {
-            $this->type = 'book_list';
-        }
-        else if (!in_array(strtoupper($params[0])))
-        {
-            $this->type = 'global_search';
+            $this->sortcode = false;
+            $this->searchterm = "%" . $this->params[0] . "%";
         }
         else
         {
-            $this->type = 'fail';
+            $this->status =  '500 Internal Server Error';
+            $this->message = 'Huey did not understand your request';
+            $this->fail = true;
         }
-
+        
     }
-    public function generate_sortcodes()
-    {
 
-        switch ($this->type) {
-            case 'book_specific':
-                return 'this was a book specific';
-                   //$sections6 .= " " .  str_pad($param, 6, '0', STR_PAD_LEFT);
-                break;
-            case 'book_search':
-                return 'this was a book search';
-                break;
-            case 'book_list':
-                return 'this was a book list';
-                break;
-            case 'global_search':
-                return 'this was a global search';
-                break;
-            default:
-                // code...
-                break;
+    public function run_query($dbh)
+    {
+        if ($this->searchterm)
+        {
+            if ($this->sortcode)
+            {
+                $q = $dbh->prepare("select * from laws where sortcode like :sortcode and
+                (description like :searchterm or law_text like :searchterm)"); 
+                $data = array('sortcode' => $this->sortcode, 'searchterm' => $this->searchterm);
+            }
+            else
+            {
+                $q = $dbh->prepare("select * from laws where description like :searchterm
+                or law_text like :searchterm");
+                $data = array('searchterm' => $this->searchterm);
+            }
         }
+        else
+        {
+            $q = $dbh->prepare("select * from laws where sortcode like :sortcode");
+            $data = array('sortcode' => $this->sortcode);
+        }
+        $q->execute($data);
+        $error = $q->errorInfo();
+        if ($error[2])
+        {
+            $this->status =  '500 Internal Server Error';
+            $this->message = $error[2];
+            $this->fail = true;
+        }
+        else if ($q->rowCount() < 1)
+        {
+            $this->status =  '404 Not Found';
+            $this->message = 'No documents matched your request';
+            $this->fail = true;
+        }
+        else
+        {
+            $this->status = '200 OK';
+            $this->message = '';
+            $this->fail = false;
+        }
+        $this->result = $q->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function run_query($dbh,$params)
-    {
-        $q = $dbh->prepare('select * from laws where sortcode like ? limit 10');
-        $this->sortcode =  array_shift($params) . "%";
-        $q->bindParam(1,$this->sortcode);
-        $q->execute();
-        $this->r = $q->fetchAll();
 
-    }
     public function return_data()
     {
-        $this->output = null;
-        foreach ($this->r as $key) {
-            $this->output .= $key[1];
+        header($_SERVER['SERVER_PROTOCOL'] . " " .  $this->status);
+        if ($this->fail)
+        {
+            $this->data = array($this->status,$this->message);
         }
-        //$this->output =  strtoupper($this->val);
-        return $this->output;
+        else
+        {
+            //add status code to beginning of array
+            $arr = array_reverse($this->result, true); 
+            $arr['status'] = $this->status; 
+            $this->data = array_reverse($arr, true); 
 
+        }
+
+        return json_encode($this->data);
     }
 } 
