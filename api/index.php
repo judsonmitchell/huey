@@ -1,35 +1,22 @@
 <?php
-/*
-    -----------------------------------------
-    huey - API for Louisiana Laws
-    -----------------------------------------
-    + https://github.com/judsonmitchell/huey
-    + Copyright 2012 Judson Mitchell, Three Pipe Problem, LLC
-    + MIT License
-    
-*/
-
-/*
-What does an API request look like?:
-
-Look for an individual statute:
-    http://.../huey/api/RS/14/35/1 
-    http://.../huey/api/STATUTEGROUP/ID1/ID2/ID3
-
-    ID1 = first grouping in sortorder
-    ID2 = second grouping in sortorder
-    ID3 = third grouping in sortorder
-
-These ids are identified only by numbers
-
-OR 
-Do a search
-http://..../huey/api/SEARCHTERM
-http://..../huey/api/cch/SEARCHTERM
-searches entire children's code for search term
-
-http://.../huey/api/RS/14/SEARCHTERM
-searches all of criminal code for search term
+/**
+ * Huey - An API for Louisiana Statutory Laws
+ *
+ * This is the controller which handles requests to 
+ * Huey.  It calls the request.class.php and returns
+ * a json encoded result. As of now, Huey expects a
+ * RESTful request like so:
+ * api/[book]/[title]/[section]/[subsection]/[searchterm]
+ *
+ * Sample Requests:
+ * api/ce/404 -returns Code of Evidence Art. 404
+ * api/rs/15/529/1 -returns La. RS. 15:529.1
+ * api/rs/14/habeas -searches title 14 for the word 'habeas'
+ *
+ * @author Judson Mitchell <judsonmitchell@gmail.com>
+ * @copyright 2012 Judson Mitchell, Three Pipe Problem, LLC
+ * @url https://github.com/judsonmitchell/huey
+ * @license MIT
  */
 
 require_once('../db.php');

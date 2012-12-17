@@ -1,4 +1,17 @@
 <?php
+/**
+ * Huey - An API for Louisiana Statutory Laws
+ *
+ * This is the class which handles requests to 
+ * Huey.  At initialization, it parses the request
+ * sent from the client and returns a json encoded
+ * result.
+ *
+ * @author Judson Mitchell <judsonmitchell@gmail.com>
+ * @copyright 2012 Judson Mitchell, Three Pipe Problem, LLC
+ * @url https://github.com/judsonmitchell/huey
+ * @license MIT
+ */
 
 class handle_request
 {
