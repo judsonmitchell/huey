@@ -1,3 +1,5 @@
+site/
+index.php
 db.php
 *.un~
 *.swp
