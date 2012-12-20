@@ -22,7 +22,6 @@ class handle_request
         'CHC',  //Children's Code
         'LAC',  //La. Admin Code
         'CA',   //Constit.  Amends.
-        'CE',   //Code of Evidence
         'CC',   //Civil Code
         'CCRP', //Code of Crim. Pro.
         'CCP',  //Code of Civ. Pro.
@@ -39,15 +38,86 @@ class handle_request
          if (count($query_string) > 0)
          {
              $params = $query_string;
+             if (in_array('fuzzy',$params))
+             {
+                $this->params = $this->fuzzy_request($params);
+                //print_r($this->params);die;
+             }
          }
          else
          {
              $params = explode('/', $_SERVER['PATH_INFO']);
+             array_shift($params);
+             $this->params = $params;
+                //print_r($this->params);die;
          }
 
-         array_shift($params);
-         $this->params = $params;
          $this->generate_sortcodes();
+    }
+
+    public function match_books($needle,$haystack)
+    {
+        foreach ($haystack as $item) {
+            foreach ($item as $i) {
+                if (stristr($needle,$i))
+                {
+                    return array($item[0],$i);
+                }
+            }
+        }
+        return false;
+    }
+
+    public function fuzzy_request($params) //handle "natural language" request
+    {
+                
+        $parsed = array();  //array which will be returned by this function
+        $matched = array(); //array that will contain parts of string that have been matched
+
+        //define common citation words;looked at other methods of doing this (levenshtein, etc),
+        //but a dumb list of potential words seems best at the moment.
+        $citation_words = array(
+            array('rs','revised statutes','rev stat','r.s.'),
+            array('ce','code of evidence','c.e.'),
+            array('chc','childrens code','ch code'),
+            array('lac','louisiana administrative code','admin code','la admin code'),
+            array('ca','constitutional amendment','con amend','con. amend.'),
+            array('cc','civil code','cc art'),
+            array('ccrp','code of criminal procedure','code of crim pro','c cr p'),
+            array('ccp', 'code of civil procedure','code of civil pro','civ pro','c c p'),
+            array('lac','louisiana administrative code','la admin code'),
+            array('ago','attorney general opinion','ag opinion','ag op'),
+            array('const','louisiana constitution','la constitution','la constit')
+        );
+            
+        //if words in the query match our citation words, add the book to the parsed array;
+        //also add the matched element to an array so that we can remove it from the query later
+        if ($r = $this->match_books($params['s'],$citation_words))
+        { 
+            array_push($parsed, strtoupper($r[0]));
+            array_push($matched,$r[1]);
+        }
+
+        //look for numbers, add them to parsed array 
+        preg_match_all('!\d+!', $params['s'], $matches);
+        if (count($matches) > 0)
+        {
+            foreach ($matches[0] as $match) {
+                array_push($parsed,$match);
+                array_push($matched,$match);
+            }
+        }
+
+       //Remove unnecessary punctuation and words
+       array_push($matched,'la','louisiana',':',',','.','sec','section');
+       $search = str_ireplace($matched, '',$params['s']);
+
+       if(!ctype_space($search))
+       {
+           //anything left over, put in search
+           array_push($parsed,$search);
+       }
+       return $parsed;
     }
 
    
