@@ -41,7 +41,7 @@ class handle_request
              if (in_array('fuzzy',$params))
              {
                 $this->params = $this->fuzzy_request($params);
-                //print_r($this->params);die;
+                //print_r($this->params);
              }
          }
          else
@@ -49,7 +49,7 @@ class handle_request
              $params = explode('/', $_SERVER['PATH_INFO']);
              array_shift($params);
              $this->params = $params;
-                //print_r($this->params);die;
+                //print_r($this->params);
          }
 
          $this->generate_sortcodes();
@@ -115,22 +115,25 @@ class handle_request
        if(!ctype_space($search))
        {
            //anything left over, put in search
-           array_push($parsed,$search);
+           array_push($parsed,trim($search));
        }
        return $parsed;
     }
 
-   
     public function generate_sortcodes()
     {
+        $this->preview = true;
+
         if (in_array(strtoupper($this->params[0]), $this->books) && ctype_digit(end($this->params)))
         {  //book specific, e.g, api/rs/14/49
             $this->sortcode = array_shift($this->params);
             foreach ($this->params as $val) {
                 $this->sortcode .= " %" . str_pad($val, 5, '0', STR_PAD_LEFT) ;
             }
+
+            $this->preview = false;
         }
-        else if ( in_array(strtoupper($this->params[0]), $this->books) && ctype_alnum(end($this->params)))
+        else if ( in_array(strtoupper($this->params[0]), $this->books) && ctype_alnum(end(str_replace(' ','',$this->params))))
         {   //book search, e.g, api/rs/14/intent
             $this->sortcode = array_shift($this->params);
             $search = array_pop($this->params);
@@ -140,16 +143,17 @@ class handle_request
             $this->sortcode .= '%';
             $this->searchterm = "%$search%";
         } 
-        else if (!end($this->params)) //book list, e.g. api/rs/14/32/
+        else if (!end($this->params)) //book list, e.g. api/rs/14/ - list all laws in title 14
         {
             $this->sortcode = array_shift($this->params);
             foreach ($this->params as $val) {
                 $this->sortcode .= " %" .  str_pad($val, 5, '0', STR_PAD_LEFT);
             }
             $this->sortcode .= "%";
+            //$this->preview = false;
         
         }
-        else if (!in_array(strtoupper($this->params[0]))) //global search e.g, api/burglary
+        else if (!in_array(strtoupper($this->params[0]),$this->books)) //global search e.g, api/burglary
         {
             $this->sortcode = false;
             $this->searchterm = "%" . $this->params[0] . "%";
@@ -160,7 +164,47 @@ class handle_request
             $this->message = 'Huey did not understand your request';
             $this->fail = true;
         }
-        
+    }
+
+    public function highlight($needle, $haystack){ 
+        $ind = stripos($haystack, $needle); 
+        $len = strlen($needle); 
+        if($ind !== false){ 
+            return substr($haystack, 0, $ind) . "<span class='highlight'>" . substr($haystack, $ind, $len) . "</span>" . 
+                $this->highlight($needle, substr($haystack, $ind + $len)); 
+        } else return $haystack; 
+    } 
+
+    public function excerpt($text, $phrase, $radius = 100, $ending = "...") {
+        $phraseLen = strlen($phrase);
+        if ($radius < $phraseLen) {
+            $radius = $phraseLen;
+        }
+
+        $pos = strpos(strtolower($text), strtolower($phrase));
+
+        $startPos = 0;
+        if ($pos > $radius) {
+            $startPos = $pos - $radius;
+        }
+
+        $textLen = strlen($text);
+
+        $endPos = $pos + $phraseLen + $radius;
+        if ($endPos >= $textLen) {
+            $endPos = $textLen;
+        }
+
+        $excerpt = substr($text, $startPos, $endPos - $startPos);
+        if ($startPos != 0) {
+            $excerpt = substr_replace($excerpt, $ending, 0, $phraseLen);
+        }
+
+        if ($endPos != $textLen) {
+            $excerpt = substr_replace($excerpt, $ending, -$phraseLen);
+        }
+
+        return $this->highlight($phrase, $excerpt);
     }
 
     public function run_query($dbh)
@@ -217,11 +261,21 @@ class handle_request
         }
         else
         {
-            //add status code to beginning of array
-            $arr = array_reverse($this->result, true); 
-            $arr['status'] = $this->status; 
-            $this->data = array_reverse($arr, true); 
-
+            if ($this->preview === true)
+            {
+                foreach ($this->result as $key=>$rr) {
+                    $snippet = $this->excerpt($rr['law_text'],trim($this->searchterm, '%'));
+                    $preview = array('law_text' => $snippet);
+                    $url = array("law_url","http://hueylaw.org/api?docId=" . $rr['docid']);
+                    $rr = array_replace($rr,$preview,$url);
+                    $this->data[$key] = $rr;
+                }
+            }
+            else
+            {
+                $this->data = $this->result;
+            }
+            
         }
 
         return json_encode($this->data);
