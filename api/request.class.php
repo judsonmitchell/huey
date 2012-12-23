@@ -35,18 +35,23 @@ class handle_request
 
          parse_str($_SERVER['QUERY_STRING'],$query_string); //check for query string
 
-         if (count($query_string) > 0)
+         if (count($query_string) > 0) 
          {
              $params = $query_string;
-             if (in_array('fuzzy',$params))
+             if (in_array('fuzzy',$params)) // api/index.php?type=fuzzy$s=liability
              {
                 $this->params = $this->fuzzy_request($params);
-                //print_r($this->params);
+             }
+             
+             if (in_array('docid',$params)) // specific document api/index.php?type=docid&s=23244
+             {
+
+                $this->docid = $params['s'];
              }
          }
          else
          {
-             $params = explode('/', $_SERVER['PATH_INFO']);
+             $params = explode('/', $_SERVER['PATH_INFO']); //REST request api/15/529/1
              array_shift($params);
              $this->params = $params;
                 //print_r($this->params);
@@ -109,7 +114,7 @@ class handle_request
         }
 
        //Remove unnecessary punctuation and words
-       array_push($matched,'la','louisiana',':',',','.','sec','section');
+       array_push($matched,' la ',' louisiana ',':',',','.',' sec ',' section ');
        $search = str_ireplace($matched, '',$params['s']);
 
        if(!ctype_space($search))
@@ -150,7 +155,6 @@ class handle_request
                 $this->sortcode .= " %" .  str_pad($val, 5, '0', STR_PAD_LEFT);
             }
             $this->sortcode .= "%";
-            //$this->preview = false;
         
         }
         else if (!in_array(strtoupper($this->params[0]),$this->books)) //global search e.g, api/burglary
@@ -224,11 +228,19 @@ class handle_request
                 $data = array('searchterm' => $this->searchterm);
             }
         }
+        else if($this->docid)
+        {
+
+                $this->preview = false; //turn off previews
+                $q = $dbh->prepare("select * from laws where docid = :docid");
+                $data = array('docid' => $this->docid);
+        }
         else
         {
             $q = $dbh->prepare("select * from laws where sortcode like :sortcode");
             $data = array('sortcode' => $this->sortcode);
         }
+
         $q->execute($data);
         $error = $q->errorInfo();
         if ($error[2])
@@ -249,6 +261,7 @@ class handle_request
             $this->message = '';
             $this->fail = false;
         }
+
         $this->result = $q->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -257,7 +270,7 @@ class handle_request
         header($_SERVER['SERVER_PROTOCOL'] . " " .  $this->status);
         if ($this->fail)
         {
-            $this->data = array($this->status,$this->message);
+            $this->data = array('status' => $this->status, 'message' => $this->message);
         }
         else
         {
