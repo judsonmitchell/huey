@@ -16,16 +16,16 @@ Usage:
     php scraper/scraper.php
 
 ### RESTful API
-This API is still very much in beta.  It takes requests in the following format:
+This API is still very much in beta.  It takes requests in the following format and returns json:
 
     http://hueylaw.org/api/[book]/[title]/[section]/[subsection]/[searchterm]
     
 Sample Requests:
 
-    http://hueylaw.org/api/ce/404 //returns Code of Evidence Art. 404
-    http://hueylaw.org/api/rs/15/529/1 //returns La. RS. 15:529.1
-    http://hueylaw.org/api/rs/14/habeas //searches title 14 for the word 'habeas'
-    http://hueylaw.org/api/succession //searches entire db for 'succession' 
+    http://hueylaw.org/api/ce/404   //returns Code of Evidence Art. 404
+    http://hueylaw.org/api/rs/15/529/1   //returns La. RS. 15:529.1
+    http://hueylaw.org/api/rs/14/homicide   //searches title 14 for the word 'homicide'
+    http://hueylaw.org/api/succession   //searches entire db for 'succession' 
 
 ### The name?
 The project is dedicated to this guy:
