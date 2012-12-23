@@ -6,20 +6,26 @@ on the [U.S. Code] (https://github.com/unitedstates).  Although the State of Lou
 makes its laws [available on the internet](http://legis.la.gov/lss/toc.htm), it's
 now impossible for developers to access these laws in a programmatic way.
 
-For starters, I am developing a scraper, written in php, to retrieve and order all 
-the Louisiana laws in a database.  After that, I'll move on to developing a RESTful API. Anyone
-who would like to help (particularly in porting this to other languages), is more than
-welcome.
-
 ### Scraper
-The scraper is still very much experimental. 
+The scraper scans the [Louisiana Legislature Site](http://legis.la.gov) and adds the laws
+to a mysql or sqlite db.  There is still some polishing to do on this (removing duplicates,
+for example), but the scraper generally works well.
 
 Usage:
 
     php scraper/scraper.php
 
 ### RESTful API
-Still in the planning stages.
+This API is still very much in beta.  It takes requests in the following format:
+
+    http://hueylaw.org/api/[book]/[title]/[section]/[subsection]/[searchterm]
+    
+Sample Requests:
+
+    http://hueylaw.org/api/ce/404 //returns Code of Evidence Art. 404
+    http://hueylaw.org/api/rs/15/529/1 //returns La. RS. 15:529.1
+    http://hueylaw.org/api/rs/14/habeas //searches title 14 for the word 'habeas'
+    http://hueylaw.org/api/succession //searches entire db for 'succession' 
 
 ### The name?
 The project is dedicated to this guy:
