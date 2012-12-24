@@ -82,24 +82,24 @@ class handle_request
         //define common citation words;looked at other methods of doing this (levenshtein, etc),
         //but a dumb list of potential words seems best at the moment.
         $citation_words = array(
-            array('rs','revised statutes','rev stat','r.s.'),
-            array('ce','code of evidence','c.e.'),
-            array('chc','childrens code','ch code'),
-            array('lac','louisiana administrative code','admin code','la admin code'),
-            array('ca','constitutional amendment','con amend','con. amend.'),
-            array('cc','civil code','cc art'),
-            array('ccrp','code of criminal procedure','code of crim pro','c cr p'),
-            array('ccp', 'code of civil procedure','code of civil pro','civ pro','c c p'),
-            array('lac','louisiana administrative code','la admin code'),
-            array('ago','attorney general opinion','ag opinion','ag op'),
-            array('const','louisiana constitution','la constitution','la constit')
+            array('rs ','revised statutes' , 'rev stat','r.s.'),
+            array('ce ','code of evidence','c.e.'),
+            array('chc ','childrens code','ch code'),
+            array('lac ','louisiana administrative code','admin code','la admin code'),
+            array('ca ','constitutional amendment','con amend','con. amend.'),
+            array('cc ','civil code','cc art'),
+            array('ccrp ','code of criminal procedure','code of crim pro','c cr p'),
+            array('ccp ', 'code of civil procedure','code of civil pro','civ pro','c c p'),
+            array('lac ','louisiana administrative code','la admin code'),
+            array('ago ','attorney general opinion','ag opinion','ag op'),
+            array('const ','louisiana constitution','la constitution','la constit')
         );
             
         //if words in the query match our citation words, add the book to the parsed array;
         //also add the matched element to an array so that we can remove it from the query later
         if ($r = $this->match_books($params['s'],$citation_words))
         { 
-            array_push($parsed, strtoupper($r[0]));
+            array_push($parsed, trim(strtoupper($r[0])));
             array_push($matched,$r[1]);
         }
 
