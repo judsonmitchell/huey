@@ -64,6 +64,10 @@ function clean_sortcodes($val)
             $sortcode = substr($val,4);    
             return $sortcode;
             break;
+        case  substr_count($val,'CJP') > 1: //duplicate "CJP" 
+            $sortcode = substr($val,4);    
+            return $sortcode;
+            break;
         default:
             return $val;
             break;
