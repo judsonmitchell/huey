@@ -26,7 +26,7 @@ function queryHuey(type,search)
         var source = $("#each-template").html();
         var template = Handlebars.compile(source);
         $("#results").html(template({laws:serverResponse}));
-        History.pushState(data,'Huey - ' + search ,'?type=' + type + '&s=' + search);
+        History.pushState(data,'Huey - ' + serverResponse[0].title ,'?type=' + type + '&s=' + search);
 
     })
     .error(function(jqXHR, textStatus, errorThrown){
