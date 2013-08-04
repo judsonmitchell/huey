@@ -29,6 +29,15 @@ $time_start = microtime(true);
 //which is unncessary or which destroys the sort
 function clean_sortcodes($val)
 {
+    //make sure sortcode is six digits
+    $parts = explode(" ",$val);
+    array_walk($parts, function(&$p){
+        if (ctype_digit($p)) {
+            $p = str_pad($p, 6, '0', STR_PAD_LEFT);
+        }
+    });
+
+    //strip out cruft
     switch ($val) {
         case  substr_count($val,'RS') > 1: //revised statutes; duplicate rs line
             $sortcode = substr($val,10);    
@@ -78,6 +87,7 @@ function clean_sortcodes($val)
             return $val;
             break;
     }
+
 }
 
 echo "Scraping...this could take a while....";
