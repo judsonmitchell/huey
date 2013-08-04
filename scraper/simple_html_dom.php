@@ -64,6 +64,7 @@ define('DEFAULT_TARGET_CHARSET', 'UTF-8');
 define('DEFAULT_BR_TEXT', "\r\n");
 define('DEFAULT_SPAN_TEXT', " ");
 define('MAX_FILE_SIZE', 600000);
+define('HDOM_RETRIES', 3);
 // helper functions
 // -----------------------------------------------------------------------------
 // get html dom from file
@@ -71,11 +72,11 @@ define('MAX_FILE_SIZE', 600000);
 function file_get_html($url, $use_include_path = false, $context=null, $offset = -1, $maxLen=-1, $lowercase = true, $forceTagsClosed=true, $target_charset = DEFAULT_TARGET_CHARSET, $stripRN=true, $defaultBRText=DEFAULT_BR_TEXT, $defaultSpanText=DEFAULT_SPAN_TEXT)
 {
 	// We DO force the tags to be terminated.
-	$dom = new simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
+    $dom = new simple_html_dom(null, $lowercase, $forceTagsClosed, $target_charset, $stripRN, $defaultBRText, $defaultSpanText);
 	// For sourceforge users: uncomment the next line and comment the retreive_url_contents line 2 lines down if it is not already done.
-    $maxTries = 3;
+    $maxTries = HDOM_RETRIES;
     for ($try=1; $try<=$maxTries; $try++) {
-	    if($contents = file_get_contents($url, $use_include_path, $context, $offset)){
+        if($contents = file_get_contents($url, $use_include_path, $context, $offset)){
             break;
         } else {
             echo "\nTimeout: Retrying $url\n";
