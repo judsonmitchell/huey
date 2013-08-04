@@ -14,6 +14,12 @@
  * @license MIT
  */
 
+//ini_set('default_socket_timeout',300); //5 minutes
+echo ini_get('default_socket_timeout');
+ini_set("log_errors", 1);
+ini_set("error_log", "error.log");
+error_log( "This is the error log" );
+
 require_once('../db.php');
 require_once('simple_html_dom.php');
 
@@ -163,7 +169,7 @@ for ($min; $min <= $max; $min++) {
             }
 
             //Put data in db
-            $q = $dbh->prepare("INSERT INTO `lalaws`.`laws` (`id`, `docid`, `title`,
+            $q = $dbh->prepare("INSERT INTO `laws` (`id`, `docid`, `title`,
             `description`, `sortcode`, `law_text`,`last_scraped`) 
             VALUES (NULL, :docid, :title, :description, :sortcode, :law_text, 
             CURRENT_TIMESTAMP);");
