@@ -36,7 +36,6 @@
  * @author Rus Carroll
  * @version 1.5 ($Rev: 202 $)
  * @package PlaceLocalInclude
- * @subpackage simple_html_dom
  */
 
 /**
@@ -77,6 +76,7 @@ function file_get_html($url, $use_include_path = false, $context=null, $offset =
     $maxTries = HDOM_RETRIES;
     for ($try=1; $try<=$maxTries; $try++) {
         if($contents = file_get_contents($url, $use_include_path, $context, $offset)){
+            echo "Success: $url \n";
             break;
         } else {
             echo "\nTimeout: Retrying $url\n";
@@ -152,10 +152,16 @@ class simple_html_dom_node
 	// clean up memory due to php5 circular references memory leak...
 	function clear()
 	{
-		$this->dom = null;
-		$this->nodes = null;
-		$this->parent = null;
-		$this->children = null;
+		//$this->dom = null;
+		//$this->nodes = null;
+		//$this->parent = null;
+		//$this->children = null;
+
+        //JM See http://sourceforge.net/p/simplehtmldom/bugs/103/
+        unset($this->dom);
+        unset($this->parent);
+        unset($this->parent);
+        unset($this->children);
 	}
 
 	// dump node's tree

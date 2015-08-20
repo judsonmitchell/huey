@@ -14,7 +14,7 @@
  * @license MIT
  */
 
-ini_set('default_socket_timeout',300); //5 minutes
+//ini_set('default_socket_timeout',300); //5 minutes
 ini_set("log_errors", 1);
 ini_set("error_log", "error.log");
 error_log( "Huey scraper error log:" );
@@ -97,8 +97,12 @@ $docs = 0; //number of urls touched
 //Define the ranges of document ids we are requesting; State does not
 //appear to have any logic to assigning these ids, but as far as I can
 //tell the lowest id is around 66000 and the highest around 750000 
-$min = 66000;
-$max = 750000;
+//$min = 66000;
+//$max = 750000;
+// what ran 10-4 $min = 366646;
+// $max = 463819; new max as of 10/2014 should be 919602
+$min = 271526;
+$max = 919602;
 
 for ($min; $min <= $max; $min++) {
 
@@ -206,7 +210,7 @@ for ($min; $min <= $max; $min++) {
             $law->clear(); 
             unset($law);
         }
-    }
+    } 
 }
 
 //Find execution time

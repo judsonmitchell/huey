@@ -268,6 +268,8 @@ class handle_request
     public function return_data()
     {
         header($_SERVER['SERVER_PROTOCOL'] . " " .  $this->status);
+        header("Access-Control-Allow-Origin: *");
+
         if ($this->fail)
         {
             $this->data = array('status' => $this->status, 'message' => $this->message);
