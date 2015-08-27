@@ -31,27 +31,44 @@ function make_sort_code($val){
     $book = $parts[0];
     $dot = strrpos($parts[1], '.'); 
     $colon = strrpos($parts[1], ':');
+    $subsubsection = null;
     if ($dot){
-        $subsection = substr($parts[1],$dot + 1); 
+        if (substr_count($parts[1],'.') === 2){ //eg LA RS 14:35.5.1
+            $first_dot = strpos($parts[1], '.');
+            $length = $dot - $first_dot -1;
+            $subsection = substr($parts[1], $first_dot + 1, $length); 
+            $subsubsection = substr($parts[1],$dot + 1);
+        } else {
+            $subsection = substr($parts[1],$dot + 1); 
+        }
     } else {
         $subsection = null;
     }
 
     if ($colon && $dot){
         $title = substr($parts[1],0, $colon); 
-        $length = $dot - $colon -1; 
-        $section = substr($parts[1], $colon + 1, $length);
+        if (substr_count($parts[1],'.') === 2){ //eg LA RS 14:35.5.1
+            $first_dot = strpos($parts[1], '.');
+            $length = $first_dot - $colon -1;
+            $section = substr($parts[1], $colon + 1, $length);
+        } else {
+            $length = $dot - $colon -1; 
+            $section = substr($parts[1], $colon + 1, $length);
+        }
     } else if ($colon){
         $title = substr($parts[1],0, $colon); 
         $section = substr($parts[1], $colon +1);  
-        //$length = $dot - $colon -1; 
-        //$section = substr($parts[1], $colon + 1, $length);
     } else if ($dot){
         $title = substr($parts[1],0, $dot); 
         $section = null; 
     } else {
-        $title = $parts[1]; 
-        $section = null;
+        if (substr_count($val, ' ') === 2){ //CONST is different
+            $title = $parts[1];
+            $section = $parts[2];
+        } else {
+            $title = $parts[1]; 
+            $section = null;
+        }
     }
 
     $sortcode = $book . ' ' . 
@@ -62,9 +79,12 @@ function make_sort_code($val){
     if ($subsection){
         $sortcode .= ' ' . str_pad($subsection, 6, '0', STR_PAD_LEFT);
     }
+
+    if ($subsubsection){
+        $sortcode .= ' ' . str_pad($subsubsection, 6, '0', STR_PAD_LEFT);
+    }
     return $sortcode;
 }
-
 echo "Scraping...this could take a while....";
 $time_start = microtime(true);
 $counter = 0; //number of laws successfully scraped
@@ -77,7 +97,7 @@ $docs = 0; //number of urls touched
 //$min = 66000;
 //$max = 750000;
 $min = 66000;
-$max = 919602;
+$max = 750000;
 
 for ($min; $min <= $max; $min++) {
 
@@ -93,21 +113,48 @@ for ($min; $min <= $max; $min++) {
             unset($law);
         } else {
 
-            $get_title = $law->find('span[id=LabelName]');
-            $title = $get_title[0]->innertext;
-
-            $get_body = $law->find('span[id=LabelDocument]');
-            $body = $get_body[0]->innertext;
-
-            //Strip all class and align attributes from p http://stackoverflow.com/a/3026111/49359
-            $body_html = str_get_html($body);
-            foreach ( $body_html->find('p') as $value ){
-                $value->class = null;
-                $value->align = null;
+            if ($law->find('span[id=LabelName]')){
+                $get_title = $law->find('span[id=LabelName]');
+                $title = $get_title[0]->innertext;
             }
 
-            $get_description = $law->find('span[id=LabelDocument] p',0);
-            $description = $get_description->plaintext;
+            if ($law->find('span[id=LabelDocument]')){
+                $get_body = $law->find('span[id=LabelDocument]');
+                $body = $get_body[0]->innertext;
+            }
+
+            //Strip all class and align attributes from p http://stackoverflow.com/a/3026111/49359
+            if ($body){
+                $body_html = str_get_html($body);
+                foreach ( $body_html->find('p') as $value ){
+                    $value->class = null;
+                    $value->align = null;
+                }
+            } else {
+                $body_html = '';
+            }
+
+            if ($law->find('span[id=LabelDocument] p',0)){
+                //Turns out the first paragraph does not always
+                //contain the law description. Sometimes, it has the Title and
+                //chapter name in all caps. So loop through paragraphs until
+                //we find one that is not all caps.
+                for ($i = 0; $i < 10; $i++) {
+                    $el =  $law->find('span[id=LabelDocument] p',$i);
+                    if (is_object($el)) {
+                        if (strtoupper(str_replace('&nbsp;','', $el->plaintext)) === str_replace('&nbsp;','',$el->plaintext)) {
+                            continue;
+                        } else {
+                            $get_description = $law->find('span[id=LabelDocument] p',$i);
+                            $description = $get_description->plaintext;
+                            break;
+                        }
+                    }
+                }
+
+            } else {
+                $description = '';
+            }
 
             $sortcode = make_sort_code($title);
             
@@ -150,9 +197,9 @@ for ($min; $min <= $max; $min++) {
     } 
 }
 
-//Now remove duplicates;
-$q = $dbh->prepare('ALTER IGNORE TABLE laws ADD UNIQUE (title, id)');
-$q->execute();
+//If it's a fresh db remove duplicates;
+//$q = $dbh->prepare('ALTER IGNORE TABLE laws ADD UNIQUE (title, id)');
+//$q->execute();
 
 //Find execution time
 $time_end = microtime(true);
