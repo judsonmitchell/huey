@@ -156,7 +156,7 @@ for ($min; $min <= $max; $min++) {
                 $description = '';
             }
 
-            //This removes section numbers and superfluous nbsp
+            //This removes section numbers and superfluous nbsp.
             if ($start = strrpos($description,"&nbsp;")){
                 $chop = $start + 6; 
                 $modified = str_replace('&nbsp;','', substr($description,$chop));
