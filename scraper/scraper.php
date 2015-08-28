@@ -156,6 +156,16 @@ for ($min; $min <= $max; $min++) {
                 $description = '';
             }
 
+            //This removes section numbers and superfluous nbsp
+            if ($start = strrpos($description,"&nbsp;")){
+                $chop = $start + 6; 
+                $modified = str_replace('&nbsp;','', substr($description,$chop));
+                if (strlen($modified)<1){
+                    $modified = str_replace('&nbsp;','', $description);
+                }
+                $description = $modified;
+            }
+
             $sortcode = make_sort_code($title);
             
             //Only save the laws we are interested in
