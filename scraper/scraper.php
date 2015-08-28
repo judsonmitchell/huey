@@ -166,6 +166,14 @@ for ($min; $min <= $max; $min++) {
                 $description = $modified;
             }
 
+            //So now we have some section numbers that are left because of no nbsp, so
+            if (strpos($description, '&#167;') === 0){
+                    //The real text always starts with [ or a capital letter, so:
+                    $start = strcspn($description, '[ABCDEFGHJIJKLMNOPQRSTUVWXYZ');
+                    $modified =  substr($description, $start);
+                    $description = $modified;
+            }
+
             $sortcode = make_sort_code($title);
             
             //Only save the laws we are interested in
