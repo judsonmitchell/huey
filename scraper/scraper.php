@@ -94,10 +94,8 @@ $docs = 0; //number of urls touched
 //Define the ranges of document ids we are requesting; State does not
 //appear to have any logic to assigning these ids, but as far as I can
 //tell the lowest id is around 66000 and the highest around 750000 
-//$min = 66000;
-//$max = 750000;
 $min = 66000;
-$max = 750000;
+$max = 950000; //increase as of 2015
 
 for ($min; $min <= $max; $min++) {
 
