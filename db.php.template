@@ -6,7 +6,8 @@ $dbusername = '';
 $dbpasswd = '';
 
 try {
-        $dbh = new PDO("mysql:host=" . $dbhost . ";dbname=" . $database_name , $dbusername, $dbpasswd);
+        $dbh = new PDO("mysql:host=" . $dbhost . ";dbname=" . $database_name , 
+        $dbusername, $dbpasswd, array( PDO::ATTR_PERSISTENT => true));
         
         // MS SQL Server and Sybase with PDO_DBLIB
         //$dbh = new PDO("mssql:host=" . $dbhost . ";dbname=" . $database_name, $dbusername, $dbpasswd");
