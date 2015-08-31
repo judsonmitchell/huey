@@ -62,7 +62,7 @@ define('HDOM_INFO_ENDSPACE',7);
 define('DEFAULT_TARGET_CHARSET', 'UTF-8');
 define('DEFAULT_BR_TEXT', "\r\n");
 define('DEFAULT_SPAN_TEXT', " ");
-define('MAX_FILE_SIZE', 600000);
+define('MAX_FILE_SIZE', 100000); //reduce default which was 600000; saves memory
 define('HDOM_RETRIES', 3);
 // helper functions
 // -----------------------------------------------------------------------------
