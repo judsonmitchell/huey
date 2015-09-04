@@ -19,7 +19,7 @@
 //ini_set('default_socket_timeout',300); //5 minutes
 ini_set("log_errors", 1);
 ini_set("error_log", "error.log");
-error_log( "Huey scraper error log:" );
+error_log( "Huey: scraping begun at " . date("Y-m-d H:i:s") );
 
 require_once('../db.php');
 require_once('simple_html_dom.php');
@@ -85,7 +85,7 @@ function make_sort_code($val){
     }
     return $sortcode;
 }
-echo "Scraping...this could take a while....";
+echo "Scraping...this could take a while....\n";
 $time_start = microtime(true);
 $counter = 0; //number of laws successfully scraped
 $errors = 0; //db errors
@@ -95,11 +95,21 @@ $docs = 0; //number of urls touched
 //appear to have any logic to assigning these ids, but as far as I can
 //tell the lowest id is around 66000 and the highest around 750000 
 $min = 66000;
-$max = 950000; //increase as of 2015
+$max = 965300; //increase as of 2015
 
 for ($min; $min <= $max; $min++) {
 
+    //Try to force some garbage collection every 100 hits
+    if ($min % 100 === 0){
+        $cycles = gc_collect_cycles();
+        //error_log("$cycles garbage cycles collected"); 
+    }
+
     $law = file_get_html('https://www.legis.la.gov/legis/LawPrint.aspx?d=' . $min);
+
+    if(!$law){
+        error_log("Docid $min is either empty or exceeds the max file size");
+    }
 
     if (is_object($law)) {
 
@@ -110,7 +120,6 @@ for ($min; $min <= $max; $min++) {
             $law->clear(); 
             unset($law);
         } else {
-
             if ($law->find('span[id=LabelName]')){
                 $get_title = $law->find('span[id=LabelName]');
                 $title = $get_title[0]->innertext;
@@ -124,7 +133,7 @@ for ($min; $min <= $max; $min++) {
             //Strip all class and align attributes from p http://stackoverflow.com/a/3026111/49359
             if ($body){
                 $body_html = str_get_html($body);
-                foreach ( $body_html->find('p') as $value ){
+                foreach ($body_html->find('p') as $value){
                     $value->class = null;
                     $value->align = null;
                 }
@@ -179,6 +188,8 @@ for ($min; $min <= $max; $min++) {
             
             $b = explode(' ', $sortcode);
             if (!in_array($b[0], $whitelist)){
+                //echo "memory:" . memory_get_usage() . "\n";//$ids[$n];
+                //time_nanosleep(0, 10000000);
                 echo "\nSortcode $sortcode was skipped \n";
                 $law->clear(); 
                 unset($law);
@@ -210,12 +221,11 @@ for ($min; $min <= $max; $min++) {
                 unset($law);
             }
         }
-    } 
-}
+    } }
 
 //If it's a fresh db remove duplicates;
-//$q = $dbh->prepare('ALTER IGNORE TABLE laws ADD UNIQUE (title, id)');
-//$q->execute();
+$q = $dbh->prepare('ALTER IGNORE TABLE laws ADD UNIQUE (title, id)');
+$q->execute();
 
 //Find execution time
 $time_end = microtime(true);
