@@ -64,7 +64,9 @@ CREATE TABLE IF NOT EXISTS `laws` (
   `sortcode` varchar(100) NOT NULL,
   `law_text` text NOT NULL,
   `last_scraped` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `title` (`title`)
+
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
