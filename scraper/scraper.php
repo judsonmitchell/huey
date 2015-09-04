@@ -180,6 +180,12 @@ for ($min; $min <= $max; $min++) {
                     $description = $modified;
             }
 
+            if (strpos($r['description'], 'Art. ') === 0){
+                $start = strcspn(substr($r['description'], 1), '([ABCDEFGHJIJKLMNOPQRSTUVWXYZ');
+                $modified =  substr($r['description'], $start);
+                $description = $modified;
+            }
+
             $sortcode = make_sort_code($title);
             
             //Only save the laws we are interested in
