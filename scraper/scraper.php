@@ -92,8 +92,7 @@ $errors = 0; //db errors
 $docs = 0; //number of urls touched
 
 //Define the ranges of document ids we are requesting; State does not
-//appear to have any logic to assigning these ids, but as far as I can
-//tell the lowest id is around 66000 and the highest around 750000 
+//appear to have any logic to assigning these ids.
 $min = 66000;
 $max = 965300; //increase as of 2015
 
@@ -174,7 +173,7 @@ for ($min; $min <= $max; $min++) {
             }
 
             //So now we have some section numbers that are left because of no nbsp, so
-            if (strpos($description, '&#167;') === 0){
+            if (strpos($description, '&#167;') === 0 || strpos($description, '&sect;') === 0){
                     //The real text always starts with [ or a capital letter, so:
                     $start = strcspn($description, '[ABCDEFGHJIJKLMNOPQRSTUVWXYZ');
                     $modified =  substr($description, $start);
@@ -188,8 +187,6 @@ for ($min; $min <= $max; $min++) {
             
             $b = explode(' ', $sortcode);
             if (!in_array($b[0], $whitelist)){
-                //echo "memory:" . memory_get_usage() . "\n";//$ids[$n];
-                //time_nanosleep(0, 10000000);
                 echo "\nSortcode $sortcode was skipped \n";
                 $law->clear(); 
                 unset($law);
